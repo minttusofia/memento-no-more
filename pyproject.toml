@@ -1,0 +1,28 @@
+[project]
+name = "training"  # required
+version = "0.0.1"  # required
+# This tells ruff and other tools that we assume Python 3.10 or higher
+requires-python = ">=3.10"
+
+[tool.ruff]
+line-length = 120  # default is 88
+
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
+# McCabe complexity (`C901`) by default.
+# select = ["E4", "E7", "E9", "F"]
+# Added: B for bugbear. See https://docs.astral.sh/ruff/rules/
+select = ["E4", "E7", "E9", "F", "B"]
+# select = ["ALL"]
+ignore = [
+    "ANN101",  # Type annotation for self
+    "ANN204",  # Type annotation for return type of __init__
+    "D100",  # Missing docstrings
+    "D101",
+    "D102",
+    "D103",
+    "D105",
+    "D107",
+    "F704",  # `await` statement outside of a function
+]

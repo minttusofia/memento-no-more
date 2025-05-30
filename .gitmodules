@@ -1,0 +1,6 @@
+[submodule "tasks/t_ToolQA/ToolQA"]
+	path = tasks/t_ToolQA/ToolQA
+	url = git@github.com:yagao403/ToolQA.git
+[submodule "tasks/t_OfficeBench/OfficeBench"]
+	path = tasks/t_OfficeBench/OfficeBench
+	url = git@github.com:yagao403/OfficeBench.git

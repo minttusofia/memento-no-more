@@ -1,0 +1,17 @@
+*.code-workspace
+*.egg-info
+*.*venv*
+**/*.out
+**/*.err
+**__pycache__
+wandb
+checkpoints
+*.log
+agent_runs/**
+agent_batch_runs/**
+agent_dataset/**
+.vscode/**
+**scratchpad**
+web_interface
+**/.DS_Store
+tasks/home
