@@ -204,6 +204,10 @@ To evaluate a model on GSM8K, run `run_concurrent_GSM8K.py` in an interactive VS
 
 **HumanEval**: To evaluate a model on HumanEval, run `benchmarking/humaneval/run_humaneval.py` in an interactive VSCode session.
 
+## 4. Trained models
+
+Our trained models can be accessed from HuggingFace: https://huggingface.co/collections/yagao403/momento-no-more-683c4a7132ade965b6ce04bb.
+
 ## Citation
 
 If you found this implementation useful, please cite our work as
