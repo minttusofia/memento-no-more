@@ -132,6 +132,8 @@ For ToolQA, you will additionally need to download the external corpus from http
 Original ToolQA repository: https://github.com/night-chen/ToolQA  
 Original OfficeBench repository: https://github.com/zlwang-cs/OfficeBench
 
+GSM8K: The GSM8K test data can be downloaded from: https://github.com/openai/grade-school-math/blob/master/grade_school_math/data/test.jsonl
+
 ## 3. Rerunning experiments
 
 ### 3.1. Launch a vLLM instance for the base model on a GPU cluster (skip this step if only evaluating an API):
