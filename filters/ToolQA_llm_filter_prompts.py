@@ -44,7 +44,7 @@ Here is an example showing that the agent retrieves more than 10 documents in th
     To answer the question, I need to find the location of the Art Exhibition that Paul attended on 2022/01/01. I will use the provided tool to retrieve a subset of relevant documents for analysis. I will write an appropriate query to retrieve documents containing the keywords "Paul", and "2022/01/01".
     </inner_monologue>
     retrieved_docs = retrieve_agenda("Paul 2022/01/01", 1000)
-    print(retrieved_docs)   
+    print(retrieved_docs)
 </example>
 The expected output for this example is:
     ----
@@ -137,7 +137,7 @@ Below is the agent's trajectory. Please make your judgment based on the last ste
 '''
 
 prompt_ToolQA_yelp_appointment = """You are provided with the trajectory from an AI agent. The agent's task is to answer a question by retrieve and analysis information from a tabular database. The agent performs this task by thinking in inner monologues and writing Python code to execute its actions.
-The agent's task is to check if provided business requires appointments. 
+The agent's task is to check if provided business requires appointments.
 The agent can solve it by: 1. Print the attributes to view. 2. Check if "ByAppointmentOnly" is in attributes: If it does and 'ByAppointmentOnly' is 'True', the answer should be 'Yes'; If it does not have 'ByAppointmentOnly', or 'ByAppointmentOnly' is 'False', the answer should be 'No'.
 
 Your task is to determine whether the agent has followed the correct solution and did not made this mistake in its last step: If there is no 'ByAppointmentOnly' attribute, the agent sometimes incorrectly determine its answer by viewing other attributes.
@@ -160,9 +160,9 @@ Below is the agent's trajectory. Please make your judgment based on the last ste
 """
 
 prompt_ToolQA_yelp_categories = """You are provided with the trajectory from an AI agent. The agent's task is to answer a question by retrieve and analysis information from a tabular database. The agent performs this task by thinking in inner monologues and writing Python code to execute its actions.
-For some questions, the agent needs to filter the rows by "categories" column. To do so, the agent shouldn't use some provided tools like `data_filter()`. Instead, the agent should use the following codes: `data_business = data[data['categories'].str.contains('Restaurants')] # keep rows related to Restaurants business`.  
+For some questions, the agent needs to filter the rows by "categories" column. To do so, the agent shouldn't use some provided tools like `data_filter()`. Instead, the agent should use the following codes: `data_business = data[data['categories'].str.contains('Restaurants')] # keep rows related to Restaurants business`.
 
-Your task is to determine whether the agent has followed the correct solution in its last step.
+Your task is to determine whether the agent has followed the correct solution in its last step. Focus only on the final step.
 
 Here is the format of the response you should strictly follow:
     ----
@@ -219,17 +219,17 @@ Here is the format of the response you should strictly follow:
     </answer>
     ----
 
-Answer True if the agent has strictly followed the correct solution (i.e., directly returning the "number of citations for this paper"); or the last step is not related to the task (for example, graph loading or calling `complete_task()` to end the task).
+Answer True if the agent has strictly followed the correct solution (i.e., directly returning the "number of citations for this paper"); or the last step is not related to the citation task (for example, graph loading or calling `complete_task()` to end the task).
 Answer False if the agent made a mistake in the last step (i.e., overcomplicating the solution or failing to return the citation count directly).
 
 Below is the agent's trajectory. Please make your judgment based on the last step only. The earlier steps are included as additional context.
 """
 
-prompt_ToolQA_table_column_name = """You are provided with the trajectory from an AI agent. The agent's task is to answer a question by retrieve and analysis information from a tabular database. The agent performs this task by thinking in inner monologues and writing Python code to execute its actions.
+prompt_ToolQA_airbnb_column_name = """You are provided with the trajectory from an AI agent. The agent's task is to answer a question by retrieve and analysis information from a tabular database. The agent performs this task by thinking in inner monologues and writing Python code to execute its actions.
 When the agent needs to get a value of a column, the agent should use `get_value` method and provide the database and the correct column name as the argument. For example, `get_value(filtered_db, 'reviews per month')`.
 The agent sometimes makes mistakes by using the wrong column name, e.g., ``get_value(filtered_db, 'reviews_per_month') # using a incorrect column name 'reviews_per_month' instead of 'reviews per month'``
 
-Your task is to determine whether the agent uses `get_value` method with the correct column name in its last step.
+Your task is to determine whether the agent uses `get_value` method with the correct column name 'reviews per month' in its last step.
 
 Here is the format of the response you should strictly follow:
     ----
@@ -243,7 +243,7 @@ Here is the format of the response you should strictly follow:
     ----
 
 Answer True if the agent has strictly followed the correct solution (i.e., using the correct column name in the `get_value` method); or the last step is not related to get value of a column.
-Answer False if the agent has made the above mistakes in its last step.
+Answer False if the agent has used the wrong column name 'reviews_per_month' in its last step.
 
 Below is the agent's trajectory. Please make your judgment based on the last step only. The earlier steps are included as additional context.
 """
@@ -273,13 +273,19 @@ Below is the agent's trajectory. Please make your judgment based on the last ste
 
 prompt_ToolQA_airbnb_price = """
 You are provided with the trajectory from an AI agent. The agent's task is to answer a question by retrieve and analysis information from a tabular database. The agent performs this task by thinking in inner monologues and writing Python code to execute its actions.
-For some questions, the agent needs to get the value of 'price', process it, and split it into a list of float. The correct way is: 
+For some questions, the agent needs to get the value of 'price', process it, and split it into a list of float. The correct way is:
 ```
-prices = prices.replace('$','').replace(',','') # the agent must first remove ',' and '$'
+prices = prices.replace('$','').replace(',','') # the agent must first remove ',' and '$' first
 prices_list = [float(price) for price in prices.split()]` # then convert to a list of float
 ```
 
-Your task is to determine whether the agent has followed the correct solution in its last step.
+Your task is to determine whether the agent has strictly followed the correct solution in its last step.
+
+Example of incorrect solution:
+The agent incorrectly processes the 'price' by first splitting it into a list of strings, and then replacing ',' and '$' in each string.
+```
+prices_list = [float(price.replace('$','').replace(',','')) for price in prices.split(', ')] # It should first remove ',' and '$' in each string before converting to a list of float.
+```
 
 Here is the format of the response you should strictly follow:
     ----
@@ -300,12 +306,20 @@ Below is the agent's trajectory. Please make your judgment based on the last ste
 
 prompt_ToolQA_airbnb_review_rate = """
 You are provided with the trajectory from an AI agent. The agent's task is to answer a question by retrieve and analysis information from a tabular database. The agent performs this task by thinking in inner monologues and writing Python code to execute its actions.
-For the question about the number of airbnbs that have a review rate not lower than 4, the agent needs to:
-1. Get values of 'review rate number' of filtered rows: `rates = get_value(filtered_db, 'review rate number')`
-2. Convert to a list of floating-point numbers: `rates_list = [float(rate) for rate in rates.split(', ')]`.
-3. Calculate the number of reviews with a rate greater than 4: `num = sum([1 for i in range(len(rates_list)) if rates_list[i] >= 4])`.
+For the question about the number of airbnbs that have a review rate not lower than 4, the agent needs to strictly follow the correct solution below:
+1. Filter the data only by 'neighbourhood'. Do not filter it by any more columns.
+2. Get values of 'review rate number' of filtered rows: `rates = get_value(filtered_db, 'review rate number')`
+3. Convert to a list of floating-point numbers: `rates_list = [float(rate) for rate in rates.split(', ')]`.
+4. Calculate the number of reviews with a rate greater than 4: `num = sum([1 for i in range(len(rates_list)) if rates_list[i] >= 4])`.
 
 Your task is to determine whether the agent has strictly followed the correct solution in its last step.
+
+Example of incorrect solution:
+
+The agent incorrectly filters the data by "review rate number" column, e.g.,
+```
+filtered_db = data_filter(airbnb_db, 'neighbourhood=Randall Manor; review rate number>=4')
+```
 
 Here is the format of the response you should strictly follow:
     ----
@@ -318,8 +332,8 @@ Here is the format of the response you should strictly follow:
     </answer>
     ----
 
-Answer True if the agent has strictly followed the correct solution (i.e., calculating the number of airbnbs with a review rate greater than 4); or the last step is not related to this calculation.
-Answer False if the last step is related to this calculation, but the agent has not followed the correct solution in its last step.
+Answer True if the agent has strictly followed the correct solution in its last step (i.e., the last step corresponds to any correct step in the solution); or the last step does not involve any solution steps related to the task.
+Answer False if the last step is related one of the correct solution steps, but the agent has not followed the correct solution in its last step.
 
 Below is the agent's trajectory. Please make your judgment based on the last step only. The earlier steps are included as additional context.
 """
@@ -329,7 +343,7 @@ You are provided with the trajectory from an AI agent. The agent's task is to an
 For the question about the highest or lowest price of coffee, the agent needs to get values of 'High' or 'Low'. Then, it should identify the lowest or highest price among these values.
 However, the agent sometimes makes an error by returning a value from the 'High' or 'Low' column without actually determining the highest or lowest price.
 
-Your task is to determine whether the agent correctly identified the lowest or highest price of coffee in its last step.
+Your task is to determine whether the agent correctly identified the lowest or highest price of coffee in its last step. Focus only on the final step and evaluate whether it demonstrates a correct determination according to the rules above.
 
 Here is the format of the response you should strictly follow:
     ----
@@ -342,8 +356,11 @@ Here is the format of the response you should strictly follow:
     </answer>
     ----
 
-Answer True if the agent correctly determined the lowest or highest price of coffee OR if the last step is unrelated to this calculation.
-Answer False if the agent's last step was related to this calculation but failed to determine the lowest or highest price.
+Answer True if any of the following is true:
+- The last step correctly computes and identifies the highest or lowest price.
+- The last step is unrelated to determining the highest or lowest price.
+- The agent has not yet attempted to finalize the highest or lowest price (i.e., the task appears unfinished).
+Answer False if the agent's last step was related to this calculation but failed to determine the lowest or highest price (e.g., returns a raw High or Low value without comparison).
 """
 
 prompt_ToolQA_flights_distance = """
@@ -353,6 +370,12 @@ For the question about the number of flights with a distance greater than 300 mi
 1. Convert to a list of floating-point numbers: `distances_list = [float(dist) for dist in distances.split(', ')]`.
 2. Calculate the number of flights with a distance greater than 300 miles: `num = sum([1 for i in range(len(distances_list)) if distances_list[i] > 300.0])`.
 However, the agent sometimes incorrectly uses `data_filter()` to filter rows where distance is greater than 300 miles. This is not the correct approach for this calculation.
+
+Example of incorrect solution:
+The agent incorrectly filters the data by 'Distance' column, e.g.,
+```
+filtered_flights = data_filter(flights_db, 'FlightDate=2022-01-03; Distance>300')
+```
 
 Your task is to determine whether the agent has strictly followed the correct solution in its last step.
 
@@ -376,7 +399,7 @@ Below is the agent's trajectory. Please make your judgment based on the last ste
 prompt_ToolQA_flights_delay_minutes = """
 You are provided with the trajectory from an AI agent. The agent's task is to answer a question by retrieve and analysis information from a tabular database. The agent performs this task by thinking in inner monologues and writing Python code to execute its actions.
 
-For the question about the average delay time of all the flights, or the question about how long did a flight delay when arrival on a specific date, the agent must get the value of 'DepDelayMinutes' or 'ArrDelayMinutes'. 
+For the question about the average delay time of all the flights, or the question about how long did a flight delay when arrival on a specific date, the agent must get the value of 'DepDelayMinutes' or 'ArrDelayMinutes'.
 However, the agent sometimes incorrectly attempts to get the value of other columns, such as 'DepDelay' or 'ArrDelay', which are not the correct columns.
 
 Your task is to determine whether the agent accessed 'DepDelayMinutes' or 'ArrDelayMinutes' in its last step.
@@ -408,7 +431,7 @@ For example,
 
 Your task is to determine, in the last step, whether the agent has followed the correct solution and not made the following mistakes:
 1. Converting the time format programmatically.
-2. Writing the time in the wrong format (e.g., '08:20' instead of '8:20').
+2. Writing the time in the wrong format (e.g., incorrect '08:20' instead of '8:20').
 
 Here is the format of the response you should strictly follow:
     ----
@@ -501,7 +524,7 @@ For the question about the average review counts of businesses within a 5-mile r
 4. Calculate the average review counts.
 
 The agent sometimes incorrectly uses `data_filter()` to filter the review counts of businesses within a 5-mile radius, e.g., `filtered_db = data_filter(yelp_db, f'latitude<=max_lat; latitude>=min_lat; longitude<=max_lon; longitude>=min_lon')`.
-This is not the correct approach.
+
 
 Your task is to determine whether the agent has strictly followed the correct solution in its last step, where the agent should not use `data_filter()` to filter the review counts of businesses within a 5-mile radius.
 
@@ -516,8 +539,8 @@ Here is the format of the response you should strictly follow:
     </answer>
     ----
 
-Answer True if the agent has strictly followed the correct solution (i.e., not using `data_filter()` to filter the review counts of businesses within a 5-mile radius); or the last step is not related to this calculation.
-Answer False if the last step is related to this calculation, but the agent has not followed the correct solution in its last step, i.e., using `data_filter()` to filter the review counts of businesses within a 5-mile radius.
+Answer True if the agent has strictly followed the correct solution (i.e., not using `data_filter()` to filter the review counts of businesses within a 5-mile radius); or the last step is not related to the solution steps related to the task.
+Answer False if the last step is related one of the solution steps, but the agent has not followed the correct solution in its last step, e.g., using `data_filter()` to filter the review counts of businesses within a 5-mile radius.
 
 Below is the agent's trajectory. Please make your judgment based on the last step only. The earlier steps are included as additional context.
 """
@@ -710,7 +733,7 @@ You are provided with the trajectory from an AI agent. The agent's task is to an
 
 When the agent uses `check_node()` method to check the attributes of a node, the agent should provide the the exact same name of the author or paper as they are shown in the question in the last step.
 
-Your task is to determine, when using `check_node()` method, whether the agent has provided the extact same name of the author or paper in its last step as they are shown in the question. 
+Your task is to determine, when using `check_node()` method, whether the agent has provided the extact same name of the author or paper in its last step as they are shown in the question.
 
 Here is the format of the response you should strictly follow:
     ----
@@ -761,7 +784,7 @@ TOOLQA_PROMPTS = {
 'ToolQA_yelp_categories': prompt_ToolQA_yelp_categories,
 'ToolQA_flights_airtime': prompt_ToolQA_flights_airtime,
 'ToolQA_graph_citations': prompt_ToolQA_graph_citations,
-'ToolQA_table_column_name': prompt_ToolQA_table_column_name,
+'ToolQA_airbnb_column_name': prompt_ToolQA_airbnb_column_name,
 'ToolQA_airbnb_load_db': prompt_ToolQA_airbnb_load_db,
 'ToolQA_airbnb_price': prompt_ToolQA_airbnb_price,
 'ToolQA_airbnb_review_rate': prompt_ToolQA_airbnb_review_rate,
@@ -778,7 +801,7 @@ TOOLQA_PROMPTS = {
 'ToolQA_printing': prompt_ToolQA_printing,
 'ToolQA_flights_diverted': prompt_ToolQA_flights_diverted,
 'ToolQA_flights_speed': prompt_ToolQA_flights_speed,
-'ToolQA_graph_loading': prompt_ToolQA_graph_loading,  
+'ToolQA_graph_loading': prompt_ToolQA_graph_loading,
 'ToolQA_graph_name': prompt_ToolQA_graph_name,
 'ToolQA_text_printing': prompt_ToolQA_text_printing
-}   
+}
